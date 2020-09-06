@@ -1,0 +1,113 @@
+{% extends 'shop/basic.html' %}
+{% block title %} Checkout - MyShop Cart {% endblock %}
+{% block body %}
+<div class="container">
+    <div class="col my-4">
+        <h2>1-Qadam- Online do`kon savatini tezkor tekshiruvi - Sizning savatingizdagi buyurtmalaringizni ko`rib
+            chiqing</h2>
+        <div my-4>
+            <ul class="list-group" id="items">
+
+            </ul>
+            <nav aria-label="breadcrumb ">
+                <ol class="breadcrumb mt-3">
+                    <li class="breadcrumb-item active" aria-current="page">Savatingizning umumiy qiymati
+                        <b> <span id="totalPrice"></span> so`m </b>Quyidagi ma`lumotlarni kiriting va buyurtma bering.
+                        Online do`konimizdan savdo qilganingiz uchun tashakkur.
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="col my-4">
+        <h2>2-Qadam - Manzilingiz va boshqa ma`lumotlarni kiriting:</h2>
+        <form method="post" action="/shop/checkout/">{% csrf_token %}
+            <input type="hidden" name="itemsJson" id='itemsJson'>
+            <input type="hidden" name="amount" id='amount'>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputname">Ism</label>
+                    <input type="text" class="form-control" id="name" placeholder='Ismingizni kiriting' name="name">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputEmail4">Elektron pochta</label>
+                    <input type="email" class="form-control" id="email" placeholder="Elektron pochta manzilini kiriting" name='email'>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputAddress">Manzil</label>
+                <input type="text" class="form-control" id="addess" placeholder="Turaqurgon kucha,8-uy" name='addess1'>
+            </div>
+            <div class="form-group">
+                <label for="inputAddress2">Qo`shimcha Manzil</label>
+                <input type="text" class="form-control" id="addresss" placeholder="Kvartira,studiya yoki qavat"
+                       name="address2">
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="inputCity">Shahar</label>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="shahringizni kiriting">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="inputState">Davlat</label>
+                    <input type="text" class="form-control" id="state" placeholder="Davlatingizni kiriting" name="state">
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="inputZip">Pochta indeksi</label>
+                    <input type="text" class="form-control" id="zip_code" name="zip_code" placeholder="pochta indeksi">
+                </div>
+                <div class="form-group">
+                    <label for="inputPhone">Telefon nomer</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="+998991234567" name="phone">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Buyurtma berish</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    if (localStorage.getItem('cart') == null) {
+        var cart = {};
+    } else {
+        cart = JSON.parse(localStorage.getItem('cart'));
+
+    }
+    console.log(cart);
+    var sum = 0;
+    var totalPrice = 0;
+    if ($.isEmptyObject(cart)) {
+        mystr = `<p>Savatingiz bo'sh, iltimos, tekshiruvdan oldin savatingizga ba'zi narsalar qo'shing!</p>`
+        $('#items').append(mystr);
+    }
+    else {
+        for (item in cart) {
+            let name = cart[item][1];
+            let qty = cart[item][0];
+            let itemPrice = cart[item][2];
+            sum = sum + qty;
+            totalPrice = totalPrice + qty * itemPrice;
+            mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${name}
+                    <span class="badge badge-primary badge-pill">${qty}</span>
+                </li>`
+            $('#items').append(mystr);
+        }
+    }
+    document.getElementById('cart').innerHTML = sum;
+    document.getElementById('totalPrice').innerHTML = totalPrice;
+    $('#itemsJson').val(JSON.stringify(cart));
+    {% if thank %}
+    alert('Biz bilan buyurtma berganingiz uchun tashakkur.Buyurtma identifikatoringiz - {{id}}.Buyurtmani kuzatuvchimiz yordamida buyurtmangizni kuzatish uchun undan foydalaning')
+    localStorage.clear();
+    document.location = '/shop';
+    {% endif %}
+
+    $('#amount').val($('#totalPrice').html())
+
+</script>
+{% endblock %}
